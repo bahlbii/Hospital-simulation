@@ -4,7 +4,8 @@
 #include <time.h>
 #include <semaphore.h>
 #include <stdbool.h>
-#include <sys/types.h>
+#include <unistd.h>
+#include <stdint.h>
 
 //GLOBAL VARIABLES
 int REGISTRATION_SIZE = 10; //max registration desks available.
@@ -56,64 +57,134 @@ int Restroom_Meter; //initialized between 1 and 100 at creation
 
 //function prototypes
 void *registration();
-void costCalculator();
-void *patient();
-void restroom();
-void cafe();
-void costCalculator();
-void pharmacy();
-void bloodlab();
-void operation();
-void display();
-int threadId();
+void *patient(void *n);
+void *restroom();
+void *cafe();
+void *pharmacy();
+void *bloodlab();
+void *operation();
+void *costCalculator();
+void *display();
+
+//counters
+int patientsGenerated = 0; //0;
 
 //semaphore declarations
 sem_t gpSem, patientSem, registrationSem, restroomSem, cafeSem,
     pharmacySem, bloodLabSem, operatingRoomSem, mutexSem;
+//mutex declaration
+pthread_mutex_t lock;
+
+//diseases array
+const char *disease[10] = {"heart", "lung", "brain", "eye", "skin",
+                           "ear", "bone", "mental", "kidney", "liver"};
 
 int main(int argc, char *argv[])
 {
     //semaphore initializations
     sem_init(&patientSem, 0, 0);
     sem_init(&registrationSem, 0, 10);
+    sem_init(&gpSem, 0, 10);
+    sem_init(&restroomSem, 0, 10);
+    sem_init(&cafeSem, 0, 10);
+    sem_init(&pharmacySem, 0, 10);
+    sem_init(&bloodLabSem, 0, 10);
+    sem_init(&operatingRoomSem, 0, 10);
 
     //mutex to protect critical sections
     sem_init(&mutexSem, 0, 1);
+    pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 
     //declare threads
-    pthread_t reg_thrd, patient_thrd, registration_thrd, restroom_thrd, cafe_thrd,
+    pthread_t patient_thrd, registration_thrd, gp_thrd, restroom_thrd, cafe_thrd,
         pharmacy_thrd, bloodLab_thrd, operatingRoom_thrd;
 
     //create threads
-    pthread_create(&reg_thrd, NULL, registration, NULL); //registration thread
-    pthread_create(&patient_thrd, NULL, patient, NULL);
+    pthread_create(&registration_thrd, NULL, registration, NULL); //registration thread
+    pthread_create(&gp_thrd, NULL, registration, NULL); //gp thread
+    pthread_create(&restroom_thrd, NULL, restroom, NULL); //restroom thread
+    pthread_create(&cafe_thrd, NULL, cafe, NULL); //cafe thread
+    pthread_create(&pharmacy_thrd, NULL, pharmacy, NULL); //pharmacy thread
+    pthread_create(&bloodLab_thrd, NULL, bloodlab, NULL); //bloodlab thread
+    pthread_create(&operatingRoom_thrd, NULL, operation, NULL); //or thread
 
+    int i;
+    for (i = 0; i <= patientsGenerated; i++)
+    {
+        pthread_create(&patient_thrd, NULL, patient, (void *)(intptr_t)(patientsGenerated));
+        //sleep(2);
+    }
+
+    pthread_exit(NULL);
+    //return 0;
+}
+
+void *patient(void *n)
+{
+    while (true)
+    {
+        printf("Patient[%d] generated.\n", (intptr_t)(patientsGenerated + 1));
+        //sem_wait(&patientSem);
+
+        //protect critical sector
+        pthread_mutex_lock(&lock); //sem_wait(&mutexSem);;
+        patientsGenerated++;
+        REGISTRATION_SIZE--;
+        pthread_mutex_unlock(&lock); //sem_post(&mutexSem);
+
+        sem_wait(&patientSem);
+        sem_post(&registrationSem);
+    }
     pthread_exit(NULL);
 }
 
 void *registration()
 {
+    while (true)
+    {   
+        //sem_wait(&registrationSem);
+        sleep(1);
+        printf("Patient[%d] registered successfully.\n ****idle reg desks: %d\n", patientsGenerated, REGISTRATION_SIZE);
 
-    int value;
-    sem_getvalue(&patientSem, &value);
+        int value1;
+        sem_getvalue(&registrationSem, &value1);
+        printf("registrationSem value1: %d\n\n", value1);
 
-    if (value == 0)
-        printf("patientSem value: %d\n", value);
-    else
-        printf("patientSem value: %d\n", value);
+        //protect critical sector
+        pthread_mutex_lock(&lock);//sem_wait(&mutexSem);
+        REGISTRATION_SIZE++;
+        pthread_mutex_unlock(&lock);//sem_post(&mutexSem);
 
-    printf("thread id: %d\n", threadId());
-
+        sem_wait(&registrationSem);
+        sem_post(&patientSem); //1
+    }
     pthread_exit(NULL);
 }
 
-void *patient()
+void *restroom()
 {
-    printf("thread id: %d\n", threadId());
 }
 
-int threadId()
+void *cafe()
 {
-    pid_t tid = gettid();
-    return tid;
+}
+
+void *pharmacy()
+{
+}
+
+void *bloodlab()
+{
+}
+
+void *operation()
+{
+}
+
+void *costCalculator()
+{
+}
+
+void *display()
+{
 }
