@@ -281,7 +281,7 @@ void m_restroom(Patient *patient)
 }
 
 //raise hunger and rest
-void raiseHungerRestroomMeter(Patient *patient) //increase hunger/restroom values(after waiting time)
+void raiseHungerRestroomMeter(Patient *patient) 
 {
     patient->Hunger_Meter += (rand() % (HUNGER_INCREASE_RATE - 1 + 1)) + 1;
     patient->Restroom_Meter += (rand() % (RESTROOM_INCREASE_RATE - 1 + 1)) + 1;
