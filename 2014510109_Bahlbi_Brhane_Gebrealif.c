@@ -172,7 +172,7 @@ void m_gp(Patient *patient)
 {
     printf("---- GP examining Patient:%d ----> Diagnosis: %s\n", patient->patientID, Diseases[patient->disease]);
 
-    /* generate random , if 0 = pharmacy, 1 = blood or 3 = surgery */
+    /* generate random number to choose a department, if 0 = pharmacy, 1 = blood or 3 = surgery */
     int gotoDeptmnt;
     gotoDeptmnt = rand() % 3; // gp sends patient to one of the 3 main departments
 
