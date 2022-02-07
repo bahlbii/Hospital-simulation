@@ -1,7 +1,7 @@
 /*------------------------------------------------------------------
  *  CME3205 - Operating Systems Assignment 1
  *  Deu Hospital Simulation Using Semaphores and Mutexes 
- *  Student ID: 2014510109
+ *  
  *------------------------------------------------------------------
  */
 #include <pthread.h>
