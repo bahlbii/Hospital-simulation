@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------
  *  CME3205 - Operating Systems Assignment 1
- *  Deu Hospital Simulation Using Semaphores and Mutexes 
+ *  Hospital Simulation Using Semaphores and Mutexes 
  *  
  *------------------------------------------------------------------
  */
